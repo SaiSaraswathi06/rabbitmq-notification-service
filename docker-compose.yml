@@ -1,0 +1,25 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-service:
+    build: ./api-service
+    ports:
+      - "4000:3000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  worker-service:
+    build: ./worker-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
